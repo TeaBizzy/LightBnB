@@ -74,9 +74,7 @@ const getAllReservations = function(guest_id, limit = 10) {
   const query = fs.readFileSync('../2_queries/5_user_reservations.sql').toString();
   return pool.query(query, [guest_id, limit])
   .then(res => {
-    const ob = Object.assign({}, res.rows)
-    console.log(ob)
-    return ob;
+    return res.rows;
   })
   .catch(err => console.log(err.message));
 }
@@ -92,9 +90,23 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 const getAllProperties = function(options, limit = 10) {
-  const query = fs.readFileSync('../2_queries/1_get_all_properties.sql').toString();
+  const city =  options.city ? `%${options.city}%` : '%';
+  const ownerID = options.owner_id;
+  const minPrice = options.minimum_price_per_night ? options.minimum_price_per_night * 100 : 0;
+  const maxPrice = options.maximum_price_per_night ? options.maximum_price_per_night * 100 : 2147483647;
+  const minRating = options.minimum_rating ? options.minimum_rating : 0;
+  let queryParams;
+
+  let query;
+  if(ownerID) {
+    queryParams = [city, ownerID, minPrice, maxPrice, minRating, limit];
+    query = fs.readFileSync('../2_queries/7_filtered_properties_with_userid.sql').toString();
+  } else {
+    queryParams = [city, minPrice, maxPrice, minRating, limit];
+    query = fs.readFileSync('../2_queries/6_filtered_properties.sql').toString();
+  }
   return pool
-  .query(query, [limit])
+  .query(query, queryParams)
   .then(res => {
     return res.rows;
   })
