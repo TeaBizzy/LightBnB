@@ -19,16 +19,13 @@ const pool = new Pool({
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function(email) {
-  let user;
-  for (const userId in users) {
-    user = users[userId];
-    if (user.email.toLowerCase() === email.toLowerCase()) {
-      break;
-    } else {
-      user = null;
-    }
-  }
-  return Promise.resolve(user);
+  const query = fs.readFileSync('../2_queries/2_get_user_by_email.sql').toString();
+  email = email.toLowerCase();
+  return pool.query(query, [email])
+  .then(res => {
+    return res.rows[0];
+  })
+  .catch(err => console.log(err.message));
 }
 exports.getUserWithEmail = getUserWithEmail;
 
@@ -38,10 +35,14 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return Promise.resolve(users[id]);
+  const query = fs.readFileSync('../2_queries/3_get_user_by_id.sql').toString();
+  return pool.query(query, [id])
+  .then(res => {
+    return res.rows[0];
+  })
+  .catch(err => console.log(err.message));
 }
 exports.getUserWithId = getUserWithId;
-
 
 /**
  * Add a new user to the database.
@@ -49,10 +50,16 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser =  function(user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+  const name = user.name;
+  const email = user.email;
+  const password = user.password;
+  const values = [name, email, password]
+  const query = fs.readFileSync('../2_queries/4_add_user.sql').toString();
+  return pool.query(query, values)
+  .then(res => {
+    return res.rows;
+  })
+  .catch(err => console.log(err.message));
 }
 exports.addUser = addUser;
 
