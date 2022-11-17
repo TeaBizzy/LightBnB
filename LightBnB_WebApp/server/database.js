@@ -71,7 +71,14 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function(guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+  const query = fs.readFileSync('../2_queries/5_user_reservations.sql').toString();
+  return pool.query(query, [guest_id, limit])
+  .then(res => {
+    const ob = Object.assign({}, res.rows)
+    console.log(ob)
+    return ob;
+  })
+  .catch(err => console.log(err.message));
 }
 exports.getAllReservations = getAllReservations;
 
@@ -89,7 +96,6 @@ const getAllProperties = function(options, limit = 10) {
   return pool
   .query(query, [limit])
   .then(res => {
-    console.log(res.rows)
     return res.rows;
   })
   .catch(err => console.log(err.message));
