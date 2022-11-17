@@ -90,6 +90,7 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 const getAllProperties = function(options, limit = 10) {
+
   const city =  options.city ? `%${options.city}%` : '%';
   const ownerID = options.owner_id;
   const minPrice = options.minimum_price_per_night ? options.minimum_price_per_night * 100 : 0;
@@ -120,9 +121,27 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  console.log(property);
+  const owner = property.owner_id;
+  const title = property.title;
+  const desc = property.description;
+  const thumb = property.thumbnail_photo_url;
+  const cover = property.cover_photo_url;
+  const cost = property.cost_per_night;
+  const street = property.street;
+  const city = property.city;
+  const province = property.province;
+  const post = property.post_code;
+  const country = property.country;
+  const parking = property.parking_spaces;
+  const baths = property.number_of_bathrooms;
+  const beds = property.number_of_bedrooms;
+  const queryParams = [owner, title, desc, thumb, cover, cost, street, city, province, post, country, parking, baths, beds]
+  const query = fs.readFileSync('../2_queries/8_add_property.sql').toString();
+  return pool.query(query, queryParams)
+  .then(res => {
+    return res.rows;
+  })
+  .catch(err => console.log(err.message));
 }
 exports.addProperty = addProperty;
